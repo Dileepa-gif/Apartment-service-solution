@@ -1,8 +1,9 @@
 const AddServiceMember = require("../models/addservicemember");
 
 const createServiceember = async (req,res)=>{
+    console.log(req.body);
     const servicemember = new AddServiceMember ({
-        ...req.body
+        ...req.body, ServiceCatogory : req.body.ServiceCatogory.toUpperCase()
     })
 
     try {
@@ -54,11 +55,98 @@ const deleteServiceMember = async (req,res)=>{
 }
 
 
+const getMembersForCooking = async (req, res) => {
+    try {
+
+      const serviceMember = await AddServiceMember.find({ServiceCatogory : "COOKING"});
+      if (serviceMember.length) {
+        res.status(200).json({
+          code: 200,
+          success: true,
+          data: serviceMember,
+          message: "Service member list is received",
+        });
+      } else {
+        res.status(200).json({
+          code: 200,
+          success: false,
+          data: serviceMember,
+          message: "Service member list is empty",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .json({ code: 500, success: false, message: "Internal Server Error" });
+    }
+  };
+
+
+  const getMembersForWashing = async (req, res) => {
+    try {
+
+      const serviceMember = await AddServiceMember.find({ServiceCatogory : "WASHING"});
+      if (serviceMember.length) {
+        res.status(200).json({
+          code: 200,
+          success: true,
+          data: serviceMember,
+          message: "Service member list is received",
+        });
+      } else {
+        res.status(200).json({
+          code: 200,
+          success: false,
+          data: serviceMember,
+          message: "Service member list is empty",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .json({ code: 500, success: false, message: "Internal Server Error" });
+    }
+  };
+
+
+  const getMembersForCleaning = async (req, res) => {
+    try {
+
+      const serviceMember = await AddServiceMember.find({ServiceCatogory : "CLEANING"});
+      if (serviceMember.length) {
+        res.status(200).json({
+          code: 200,
+          success: true,
+          data: serviceMember,
+          message: "Service member list is received",
+        });
+      } else {
+        res.status(200).json({
+          code: 200,
+          success: false,
+          data: serviceMember,
+          message: "Service member list is empty",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .json({ code: 500, success: false, message: "Internal Server Error" });
+    }
+  };
+
+
 
 module.exports ={
     createServiceember,
     getAllServiceMembers,
     getServiceMember,
     updateServiceMember,
-    deleteServiceMember
+    deleteServiceMember,
+    getMembersForCooking,
+    getMembersForWashing,
+    getMembersForCleaning
 }

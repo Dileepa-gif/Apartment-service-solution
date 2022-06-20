@@ -9,6 +9,7 @@ const { adminRouter } = require("./router/admin.routes");
 const { residentRouter } = require("./router/resident.routes");
 const { securityRouter } = require("./router/security.routes");
 const { complaintRouter } = require("./router/complaint.routes");
+const { serviceRouter } = require("./router/service.routes");
 
 const app = express();
 app.use(cors({origin:"*"}))
@@ -33,6 +34,7 @@ app.use("/admin",adminRouter)
 app.use("/resident",residentRouter)
 app.use("/security",securityRouter)
 app.use("/complaint",complaintRouter)
+app.use("/service",serviceRouter)
 
 module.exports = app;
 
