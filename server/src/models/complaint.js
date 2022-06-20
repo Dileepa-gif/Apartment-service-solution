@@ -1,39 +1,35 @@
 const mongoose = require("mongoose");
 var Schema = mongoose.Schema;
-const utilityBillSchema = new mongoose.Schema({
+
+const complaintSchema = new Schema({
   resident_id: {
     type: Schema.Types.ObjectId,
     ref: "user",
     required: true,
   },
-  resident_name: {
-    type: String,
-    required: false,
-  },
-  month: {
+  date: {
     type: String,
     required: true,
   },
-  type: {
+  category: {
     type: String,
     required: true,
   },
-  bill_id: {
+  description: {
     type: String,
     required: true,
   },
-  bill_amount: {
-    type: Number,
+  Status: {
+    type: String,
     required: false,
-    default: 0
+    default: "Pending",
   },
-  paid_amount: {
-    type: Number,
+  Reply: {
+    type: String,
     required: false,
-    default: 0
   },
 });
 
-const UtilityBill = mongoose.model("utility_bill", utilityBillSchema);
+const Complaint = mongoose.model("complaint", complaintSchema);
 
-module.exports = UtilityBill;
+module.exports = Complaint;
