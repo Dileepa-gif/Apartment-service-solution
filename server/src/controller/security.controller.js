@@ -125,15 +125,19 @@ const update = async function (req, res) {
       .json({ code: 200, success: false, message: "Invalid security id" });
 
     const emailExist = await Security.findOne({ email: req.body.email });
-    if (emailExist.id !== req.params.securityId)
+    if (emailExist && emailExist.id !== req.params.securityId)
       return res
         .status(200)
         .json({ code: 200, success: false, message: "Email already available" });
 
-    const salt = await bcrypt.genSalt(10);
-    const password = await bcrypt.hash(req.body.password, salt);
-
-    const updatedSecurity = {...req.body, password : password};
+    var updatedSecurity;
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(10);
+      const password = await bcrypt.hash(req.body.password, salt);
+      updatedSecurity = { ...req.body, password: password };
+    } else {
+      updatedSecurity = { ...req.body };
+    }
 
     const security = await Security.findByIdAndUpdate(
       req.params.securityId,
