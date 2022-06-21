@@ -10,7 +10,11 @@ const create = async function (req, res) {
     if (emailExist)
       return res
         .status(200)
-        .json({ code: 200, success: false, message: "Email already available" });
+        .json({
+          code: 200,
+          success: false,
+          message: "Email already available",
+        });
     var randomPassword = Math.random().toString(36).slice(-8);
     const admin = new Admin({
       email: req.body.email,
@@ -28,7 +32,7 @@ const create = async function (req, res) {
       message: "Successfully created",
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res
       .status(500)
       .json({ code: 500, success: false, message: "Internal Server Error" });
@@ -77,7 +81,9 @@ const getAllAdmins = function (req, res) {
           .json({ code: 200, success: false, message: "Invalid Request!" });
       }
 
-      return res.status(200).json({ code: 200, success: true, data: admin_list });
+      return res
+        .status(200)
+        .json({ code: 200, success: true, data: admin_list });
     });
   } catch (err) {
     res
@@ -119,23 +125,31 @@ const getAdminById = function (req, res) {
 
 const update = async function (req, res) {
   try {
-
     const oldAdmin = await Admin.findById(req.params.adminId);
     if (!oldAdmin)
-    return res
-      .status(200)
-      .json({ code: 200, success: false, message: "Invalid admin id" });
-
-    const emailExist = await Admin.findOne({ email: req.body.email });
-    if (emailExist.id !== req.params.adminId)
       return res
         .status(200)
-        .json({ code: 200, success: false, message: "Email already available" });
+        .json({ code: 200, success: false, message: "Invalid admin id" });
 
-    const salt = await bcrypt.genSalt(10);
-    const password = await bcrypt.hash(req.body.password, salt);
+    const emailExist = await Admin.findOne({ email: req.body.email });
+    if (emailExist && emailExist.id !== req.params.adminId)
+      return res
+        .status(200)
+        .json({
+          code: 200,
+          success: false,
+          message: "Email already available",
+        });
 
-    const updatedAdmin = {...req.body, password : password}
+    var updatedAdmin;
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(10);
+      const password = await bcrypt.hash(req.body.password, salt);
+      updatedAdmin = { ...req.body, password: password };
+    } else {
+      updatedAdmin = { ...req.body };
+    }
+
     const admin = await Admin.findByIdAndUpdate(
       req.params.adminId,
       updatedAdmin,
@@ -182,5 +196,5 @@ module.exports = {
   getAllAdmins,
   getAdminById,
   update,
-  deleteAdmin
+  deleteAdmin,
 };
