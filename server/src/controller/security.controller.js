@@ -11,9 +11,19 @@ const create = async function (req, res) {
       return res
         .status(200)
         .json({ code: 200, success: false, message: "Email already available" });
+    
+    var security_id = Math.random().toString(36).slice(-4).toUpperCase();
+    var securityIdExist = await Security.find({ security_id: security_id });
+
+    while(securityIdExist.length>0){
+      security_id = Math.random().toString(36).slice(-4).toUpperCase();
+      securityIdExist = await Security.find({ security_id: security_id });
+    }
+
     var randomPassword = Math.random().toString(36).slice(-8);
     const security = new Security({
       email: req.body.email,
+      security_id : security_id,
       password: randomPassword,
     });
 
@@ -124,19 +134,14 @@ const update = async function (req, res) {
       .status(200)
       .json({ code: 200, success: false, message: "Invalid security id" });
 
-    const emailExist = await Security.findOne({ email: req.body.email });
-    if (emailExist && emailExist.id !== req.params.securityId)
-      return res
-        .status(200)
-        .json({ code: 200, success: false, message: "Email already available" });
 
     var updatedSecurity;
     if (req.body.password) {
       const salt = await bcrypt.genSalt(10);
       const password = await bcrypt.hash(req.body.password, salt);
-      updatedSecurity = { ...req.body, password: password };
+      updatedSecurity = { ...req.body, security_id : oldSecurity.security_id, email : oldSecurity.email, password: password };
     } else {
-      updatedSecurity = { ...req.body };
+      updatedSecurity = { ...req.body , security_id : oldSecurity.security_id, email : oldSecurity.email };
     }
 
     const security = await Security.findByIdAndUpdate(

@@ -9,7 +9,7 @@ const securitySchema = new Schema({
   },
   security_id: {
     type: String,
-    required: false,
+    required: true,
   },
   email:{
     type: String,

@@ -18,7 +18,7 @@ const create = async function (req, res) {
     var randomPassword = Math.random().toString(36).slice(-8);
     const admin = new Admin({
       email: req.body.email,
-      password: randomPassword,
+      password: randomPassword
     });
 
     const savedAdmin = await admin.save();
@@ -131,23 +131,13 @@ const update = async function (req, res) {
         .status(200)
         .json({ code: 200, success: false, message: "Invalid admin id" });
 
-    const emailExist = await Admin.findOne({ email: req.body.email });
-    if (emailExist && emailExist.id !== req.params.adminId)
-      return res
-        .status(200)
-        .json({
-          code: 200,
-          success: false,
-          message: "Email already available",
-        });
-
     var updatedAdmin;
     if (req.body.password) {
       const salt = await bcrypt.genSalt(10);
       const password = await bcrypt.hash(req.body.password, salt);
-      updatedAdmin = { ...req.body, password: password };
+      updatedAdmin = { ...req.body, email : oldAdmin.email, password: password };
     } else {
-      updatedAdmin = { ...req.body };
+      updatedAdmin = { ...req.body, email : oldAdmin.email };
     }
 
     const admin = await Admin.findByIdAndUpdate(
