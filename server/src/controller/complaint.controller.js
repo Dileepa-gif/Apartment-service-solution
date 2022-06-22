@@ -17,6 +17,7 @@ const create = async (req, res) => {
       ...req.body,
       date: today,
       resident_id: resident.resident_id,
+      resident_object_id : req.jwt.sub.id
     });
 
     const savedComplaint = await complaints.save();
@@ -73,7 +74,7 @@ const getComplaintById = async (req, res) => {
 
 const getComplaintByResidentId = async (req, res) => {
   try {
-    const complaints = await Complaint.find({resident_id : req.jwt.sub.id});
+    const complaints = await Complaint.find({resident_object_id : req.jwt.sub.id});
     return res.status(200).json({ code: 200, success: true, data: complaints });
   } catch (error) {
     console.log(error);
