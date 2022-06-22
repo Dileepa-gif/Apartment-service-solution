@@ -2,8 +2,9 @@ const mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 
 const complaintSchema = new Schema({
-  resident_id: {
-    type: String,
+  resident_object_id: {
+    type: Schema.Types.ObjectId,
+    ref: "user",
     required: true,
   },
   date: {

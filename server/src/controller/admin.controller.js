@@ -1,24 +1,47 @@
 const Admin = require("../models/admin");
+const JoiBase = require("@hapi/joi");
+const JoiDate = require("@hapi/joi-date");
+const Joi = JoiBase.extend(JoiDate);
 
 const { adminPasswordSender } = require("../util/emailService");
 const bcrypt = require("bcrypt");
 const auth = require("../util/auth");
 
+const adminRegisterValidation = (data) => {
+  const schema = Joi.object({
+    email: Joi.string().required().max(250).email(),
+  });
+  return schema.validate(data);
+};
+
+const adminLoginValidation = (data) => {
+  const schema = Joi.object({
+    email: Joi.string().required().max(250).email(),
+    password: Joi.string().required().min(6).max(25),
+  });
+  return schema.validate(data);
+};
+
 const create = async function (req, res) {
   try {
+    const { error } = adminRegisterValidation(req.body);
+    if (error)
+      return res.status(200).json({
+        code: 200,
+        success: false,
+        message: error.details[0].message,
+      });
     const emailExist = await Admin.findOne({ email: req.body.email });
     if (emailExist)
-      return res
-        .status(200)
-        .json({
-          code: 200,
-          success: false,
-          message: "Email already available",
-        });
+      return res.status(200).json({
+        code: 200,
+        success: false,
+        message: "Email already available",
+      });
     var randomPassword = Math.random().toString(36).slice(-8);
     const admin = new Admin({
       email: req.body.email,
-      password: randomPassword
+      password: randomPassword,
     });
 
     const savedAdmin = await admin.save();
@@ -41,6 +64,13 @@ const create = async function (req, res) {
 
 const login = async function (req, res) {
   try {
+    const { error } = adminLoginValidation(req.body);
+    if (error)
+      return res.status(200).json({
+        code: 200,
+        success: false,
+        message: error.details[0].message,
+      });
     const admin = await Admin.findOne({ email: req.body.email }).select(
       "+password"
     );
@@ -135,9 +165,9 @@ const update = async function (req, res) {
     if (req.body.password) {
       const salt = await bcrypt.genSalt(10);
       const password = await bcrypt.hash(req.body.password, salt);
-      updatedAdmin = { ...req.body, email : oldAdmin.email, password: password };
+      updatedAdmin = { ...req.body, email: oldAdmin.email, password: password };
     } else {
-      updatedAdmin = { ...req.body, email : oldAdmin.email };
+      updatedAdmin = { ...req.body, email: oldAdmin.email };
     }
 
     const admin = await Admin.findByIdAndUpdate(

@@ -4,7 +4,7 @@ const create = async (req, res) => {
   try {
     const service = new Service({
       ...req.body,
-      resident_id: req.jwt.sub.id,
+      resident_object_id : req.jwt.sub.id,
       service_category: req.body.service_category.toUpperCase()
     });
 
@@ -62,7 +62,7 @@ const getServicesById = async (req, res) => {
 const getCookingServicesByResidentId = async (req, res) => {
   try {
     const services = await Service.find({
-      resident_id: req.jwt.sub.id,
+      resident_object_id : req.jwt.sub.id,
       service_category: "COOKING",
     });
     return res.status(200).json({ code: 200, success: true, data: services });
@@ -77,7 +77,7 @@ const getCookingServicesByResidentId = async (req, res) => {
 const getWashingServicesByResidentId = async (req, res) => {
   try {
     const services = await Service.find({
-      resident_id: req.jwt.sub.id,
+      resident_object_id : req.jwt.sub.id,
       service_category: "WASHING",
     });
     return res.status(200).json({ code: 200, success: true, data: services });
@@ -92,7 +92,7 @@ const getWashingServicesByResidentId = async (req, res) => {
 const getCleaningServicesByResidentId = async (req, res) => {
   try {
     const services = await Service.find({
-      resident_id: req.jwt.sub.id,
+      resident_object_id : req.jwt.sub.id,
       service_category: "CLEANING",
     });
     return res.status(200).json({ code: 200, success: true, data: services });
