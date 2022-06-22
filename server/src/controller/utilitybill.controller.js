@@ -4,13 +4,15 @@ const mongoose = require("mongoose");
 
 const create = async (req, res) => {
   try {
-    const resident = await Resident.findById(mongoose.Types.ObjectId(req.body.resident_id));
+    const resident = await Resident.findOne({resident_id : req.body.resident_id});
     if (!resident)
       return res
         .status(200)
         .json({ code: 200, success: false, message: "Invalid resident id" });
     const utilityBill = new UtilityBill({
-      ...req.body, type : req.body.type.toUpperCase()
+      ...req.body, 
+      type : req.body.type.toUpperCase(),
+      resident_object_id : req.jwt.sub.id
     });
 
     const savedUtilityBill = await utilityBill.save();
@@ -128,8 +130,8 @@ const deleteUtilityBill = async (req, res) => {
 const getUtilityBillsByResidentId = async (req, res) => {
   try {
 
-    var current_electricity_bill = await UtilityBill.findOne({resident_id : req.jwt.sub.id, type : "ELECTRICITY" }).sort({_id:-1}).limit(1);
-    var current_water_bill = await UtilityBill.findOne({resident_id : req.jwt.sub.id, type : "WATER" }).sort({_id:-1}).limit(1);
+    var current_electricity_bill = await UtilityBill.findOne({resident_object_id : req.jwt.sub.id, type : "ELECTRICITY" }).sort({_id:-1}).limit(1);
+    var current_water_bill = await UtilityBill.findOne({resident_object_id : req.jwt.sub.id, type : "WATER" }).sort({_id:-1}).limit(1);
 
     var last_electricity_bill = null;
     if(current_electricity_bill){
@@ -174,9 +176,7 @@ const getUtilityBillsByResidentId = async (req, res) => {
 
 const getPreviousBill = async (req, res) => {
   try {
-    
-
-    const utilityBill = await UtilityBill.findOne({ month : { $regex: req.body.month + '.*' }, type : req.body.type.toUpperCase() }).sort({_id:-1}).limit(1);
+    const utilityBill = await UtilityBill.findOne({ resident_object_id : req.jwt.sub.id, month : { $regex: req.body.month + '.*' }, type : req.body.type.toUpperCase() }).sort({_id:-1}).limit(1);
     if (utilityBill) {
       res.status(200).json({
         code: 200,
@@ -200,6 +200,68 @@ const getPreviousBill = async (req, res) => {
   }
 };
 
+const viewBill = async (req, res) => {
+  try {
+    const utilityBill = await UtilityBill.findOne({ resident_id : req.body.resident_id , month : { $regex: req.body.month + '.*' }, type : req.body.type.toUpperCase() }).sort({_id:-1}).limit(1);
+    if (utilityBill) {
+      res.status(200).json({
+        code: 200,
+        success: true,
+        data: utilityBill,
+        message: "Utility bill is received",
+      });
+    } else {
+      res.status(200).json({
+        code: 200,
+        success: false,
+        data: utilityBill,
+        message: "Utility bill is not found",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ code: 500, success: false, message: "Internal Server Error" });
+  }
+};
+
+const addPaidAmount = async (req, res) => {
+  try {
+    var current_bill = await UtilityBill.findOne({resident_id : req.body.resident_id, type : req.body.type.toUpperCase() }).sort({_id:-1}).limit(1);
+    
+    if (!current_bill)
+      return res.status(200).json({
+        code: 200,
+        success: false,
+        message: "There is no " + req.body.type + "bill",
+      });
+
+      const paid_amount = req.body.paid_amount + current_bill.paid_amount
+      const updates = {
+        paid_amount :paid_amount
+      };
+
+
+    const updatedUtilityBill = await UtilityBill.findByIdAndUpdate(
+      current_bill.id,
+      { ...updates },
+      { new: true }
+    );
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      data: updatedUtilityBill,
+      message: "Paid successfully!",
+    });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ code: 500, success: false, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   create,
   getAllUtilityBills,
@@ -207,5 +269,7 @@ module.exports = {
   update,
   deleteUtilityBill,
   getUtilityBillsByResidentId,
-  getPreviousBill
+  getPreviousBill,
+  viewBill,
+  addPaidAmount
 };
