@@ -1,14 +1,22 @@
 const Complaint = require("../models/complaint");
+const Resident = require("../models/resident");
 
 const create = async (req, res) => {
   try {
     const dateTime = require("node-datetime");
     const dt = dateTime.create();
     const today = dt.format("Y-m-d");
+
+    const resident = await Resident.findById(req.jwt.sub.id)
+    if (!resident)
+    return res
+      .status(200)
+      .json({ code: 200, success: false, message: "Invalid resident" });
+
     const complaints = new Complaint({
       ...req.body,
       date: today,
-      resident_id: req.jwt.sub.id,
+      resident_id: resident.resident_id,
     });
 
     const savedComplaint = await complaints.save();

@@ -3,8 +3,7 @@ var Schema = mongoose.Schema;
 
 const complaintSchema = new Schema({
   resident_id: {
-    type: Schema.Types.ObjectId,
-    ref: "user",
+    type: String,
     required: true,
   },
   date: {

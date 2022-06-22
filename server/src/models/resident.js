@@ -10,7 +10,7 @@ const residentSchema = new Schema({
   },
   resident_id: {
     type: String,
-    required: false,
+    required: true,
   },
   email:{
     type: String,

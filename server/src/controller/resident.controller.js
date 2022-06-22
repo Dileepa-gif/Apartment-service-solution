@@ -15,12 +15,22 @@ const create = async function (req, res) {
           success: false,
           message: "Email already available",
         });
+
+    var resident_id = Math.random().toString(36).slice(-4).toUpperCase();
+    var residentIdExist = await Resident.find({ resident_id: resident_id });
+
+    while(residentIdExist.length>0){
+      resident_id = Math.random().toString(36).slice(-4).toUpperCase();
+      residentIdExist = await Resident.find({ resident_id: resident_id });
+    }
+
     var randomPassword = Math.random().toString(36).slice(-8);
+
     const resident = new Resident({
       email: req.body.email,
-      password: randomPassword,
+      resident_id : resident_id,
+      password: randomPassword
     });
-
     const savedResident = await resident.save();
     residentPasswordSender(savedResident, randomPassword);
 
@@ -130,23 +140,13 @@ const update = async function (req, res) {
         .status(200)
         .json({ code: 200, success: false, message: "Invalid resident id" });
 
-    const emailExist = await Resident.findOne({ email: req.body.email });
-    if (emailExist && emailExist.id !== req.params.residentId)
-      return res
-        .status(200)
-        .json({
-          code: 200,
-          success: false,
-          message: "Email already available",
-        });
-
     var updatedResident;
     if (req.body.password) {
       const salt = await bcrypt.genSalt(10);
       const password = await bcrypt.hash(req.body.password, salt);
-      updatedResident = { ...req.body, password: password };
+      updatedResident = { ...req.body, resident_id : oldResident.resident_id, email : oldResident.email, password: password };
     } else {
-      updatedResident = { ...req.body };
+      updatedResident = { ...req.body, resident_id : oldResident.resident_id, email : oldResident.email };
     }
     const resident = await Resident.findByIdAndUpdate(
       req.params.residentId,
