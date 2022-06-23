@@ -22,6 +22,26 @@ const adminLoginValidation = (data) => {
   return schema.validate(data);
 };
 
+const adminUpdateValidation = (data) => {
+  const schema = Joi.object({
+    name: Joi.string().allow(null, "").min(2).max(250),
+    mobile_number: Joi.string()
+      .allow(null, "")
+      .regex(/^(\+\d{1,2}\s?)?1?\-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/)
+      .min(10)
+      .max(12)
+      .messages({
+        "string.min": "Must have at least 10 characters",
+        "object.regex": "Must have at least 12 characters",
+        "string.pattern.base": "Phone number should be corrected",
+      }),
+    address: Joi.string().allow(null, "").min(2).max(250),
+    password: Joi.string().allow(null, "").min(6).max(15)
+  });
+  return schema.validate(data);
+};
+
+
 const create = async function (req, res) {
   try {
     const { error } = adminRegisterValidation(req.body);
@@ -161,6 +181,13 @@ const update = async function (req, res) {
         .status(200)
         .json({ code: 200, success: false, message: "Invalid admin id" });
 
+    const { error } = adminUpdateValidation(req.body);
+    if (error)
+      return res.status(200).json({
+        code: 200,
+        success: false,
+        message: error.details[0].message,
+      });    
     var updatedAdmin;
     if (req.body.password) {
       const salt = await bcrypt.genSalt(10);

@@ -1,7 +1,28 @@
 const Service = require("../models/service");
+const JoiBase = require("@hapi/joi");
+const JoiDate = require("@hapi/joi-date");
+const Joi = JoiBase.extend(JoiDate);
+
+const serviceValidation = (data) => {
+  const schema = Joi.object({
+    service_category: Joi.string().required().min(2).max(250),
+    day: Joi.string().required().min(3).max(10),
+    time_slot: Joi.string().required().min(2).max(10),
+    member: Joi.string().required().min(3).max(250),
+  });
+  return schema.validate(data);
+};
 
 const create = async (req, res) => {
   try {
+    const { error } = serviceValidation(req.body);
+    if (error)
+      return res.status(200).json({
+        code: 200,
+        success: false,
+        message: error.details[0].message,
+      });
+
     const service = new Service({
       ...req.body,
       resident_object_id : req.jwt.sub.id,

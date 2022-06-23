@@ -1,11 +1,57 @@
 const Security = require("../models/security");
+const JoiBase = require("@hapi/joi");
+const JoiDate = require("@hapi/joi-date");
+const Joi = JoiBase.extend(JoiDate);
 
 const { securityPasswordSender } = require("../util/emailService");
 const bcrypt = require("bcrypt");
 const auth = require("../util/auth");
 
+const securityRegisterValidation = (data) => {
+  const schema = Joi.object({
+    email: Joi.string().required().max(250).email(),
+  });
+  return schema.validate(data);
+};
+
+const securityLoginValidation = (data) => {
+  const schema = Joi.object({
+    email: Joi.string().required().max(250).email(),
+    password: Joi.string().required().min(6).max(25),
+  });
+  return schema.validate(data);
+};
+
+const securityUpdateValidation = (data) => {
+  const schema = Joi.object({
+    name: Joi.string().allow(null, "").min(2).max(250),
+    address: Joi.string().allow(null, "").min(2).max(250),
+    nic: Joi.string().allow(null, "").min(10).max(15),
+    dob: Joi.string().allow(null, "").min(2).max(250),
+    phone_number: Joi.string()
+      .allow(null, "")
+      .regex(/^(\+\d{1,2}\s?)?1?\-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/)
+      .min(10)
+      .max(12)
+      .messages({
+        "string.min": "Must have at least 10 characters",
+        "object.regex": "Must have at least 12 characters",
+        "string.pattern.base": "Phone number should be corrected",
+      }),
+    password: Joi.string().allow(null, "").min(6).max(15)
+  });
+  return schema.validate(data);
+};
+
 const create = async function (req, res) {
   try {
+    const { error } = securityRegisterValidation(req.body);
+    if (error)
+      return res.status(200).json({
+        code: 200,
+        success: false,
+        message: error.details[0].message,
+      });
     const emailExist = await Security.findOne({ email: req.body.email });
     if (emailExist)
       return res
@@ -46,6 +92,14 @@ const create = async function (req, res) {
 
 const login = async function (req, res) {
   try {
+    const { error } = securityLoginValidation(req.body);
+    if (error)
+      return res.status(200).json({
+        code: 200,
+        success: false,
+        message: error.details[0].message,
+      });
+
     const security = await Security.findOne({ email: req.body.email }).select(
       "+password"
     );
@@ -134,6 +188,13 @@ const update = async function (req, res) {
       .status(200)
       .json({ code: 200, success: false, message: "Invalid security id" });
 
+      const { error } = securityUpdateValidation(req.body);
+      if (error)
+        return res.status(200).json({
+          code: 200,
+          success: false,
+          message: error.details[0].message,
+        });  
 
     var updatedSecurity;
     if (req.body.password) {

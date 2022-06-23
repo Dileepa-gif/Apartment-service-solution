@@ -1,8 +1,28 @@
 const Complaint = require("../models/complaint");
 const Resident = require("../models/resident");
+const JoiBase = require("@hapi/joi");
+const JoiDate = require("@hapi/joi-date");
+const Joi = JoiBase.extend(JoiDate);
+
+
+const complaintValidation = (data) => {
+  const schema = Joi.object({
+    category: Joi.string().required().min(2).max(250),
+    description: Joi.string().required().min(2).max(250),
+  });
+  return schema.validate(data);
+};
 
 const create = async (req, res) => {
   try {
+
+    const { error } = complaintValidation(req.body);
+    if (error)
+      return res.status(200).json({
+        code: 200,
+        success: false,
+        message: error.details[0].message,
+      });
     const dateTime = require("node-datetime");
     const dt = dateTime.create();
     const today = dt.format("Y-m-d");
@@ -11,7 +31,7 @@ const create = async (req, res) => {
     if (!resident)
     return res
       .status(200)
-      .json({ code: 200, success: false, message: "Invalid resident" });
+      .json({ code: 200, success: false, message: "Invalid resident login" });
 
     const complaints = new Complaint({
       ...req.body,
