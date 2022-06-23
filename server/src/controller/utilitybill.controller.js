@@ -172,7 +172,7 @@ const deleteUtilityBill = async (req, res) => {
         code: 200,
         success: true,
         data: utilityBill,
-        message: "Utility bill is received",
+        message: "Utility bill is deleted",
       });
     } else {
       res.status(200).json({
