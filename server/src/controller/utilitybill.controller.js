@@ -55,6 +55,7 @@ const create = async (req, res) => {
     const resident = await Resident.findOne({
       resident_id: req.body.resident_id,
     });
+    console.log(resident)
     if (!resident)
       return res
         .status(200)
@@ -62,7 +63,7 @@ const create = async (req, res) => {
     const utilityBill = new UtilityBill({
       ...req.body,
       type: req.body.type.toUpperCase(),
-      resident_object_id: req.jwt.sub.id,
+      resident_object_id: resident.id,
     });
 
     const savedUtilityBill = await utilityBill.save();
