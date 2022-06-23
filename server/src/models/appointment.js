@@ -24,6 +24,9 @@ const appoinmetSchema = new mongoose.Schema({
     startDate :{
         type:Date,
     },
+    otp:{
+        type :Number,
+    },
     appointmentStatus :{
         type:String,
     },
