@@ -5,8 +5,8 @@ const Joi = JoiBase.extend(JoiDate);
 
 const serviceMemberValidation = (data) => {
   const schema = Joi.object({
-    FirstName: Joi.string().allow(null, "").min(2).max(250),
-    MiddleName: Joi.string().allow(null, "").min(2).max(250),
+    FirstName: Joi.string().required().min(2).max(250),
+    MiddleName: Joi.string().required().min(2).max(250),
     LastName: Joi.string().allow(null, "").min(2).max(250),
     ServiceCatogory: Joi.string().allow(null, "").min(2).max(250),
     Address: Joi.string().allow(null, "").min(2).max(250),

@@ -4,7 +4,7 @@ var Schema = mongoose.Schema;
 const complaintSchema = new Schema({
   resident_object_id: {
     type: Schema.Types.ObjectId,
-    ref: "user",
+    ref: "resident",
     required: true,
   },
   resident_id: {
