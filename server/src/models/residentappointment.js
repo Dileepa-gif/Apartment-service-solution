@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 
-const appoinmetSchema = new mongoose.Schema({
+const residentAppoinmetSchema = new mongoose.Schema({
     
     appointmentName:{
         type:String,
@@ -33,6 +33,6 @@ const appoinmetSchema = new mongoose.Schema({
    
 })
 
-const Appointment = mongoose.model("Appointment",appoinmetSchema);
+const ResidentAppointment = mongoose.model("ResidentAppointment",residentAppoinmetSchema);
 
-module.exports=Appointment;
+module.exports=ResidentAppointment;
