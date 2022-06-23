@@ -1,6 +1,50 @@
 const AddServiceMember = require("../models/addservicemember");
+const JoiBase = require("@hapi/joi");
+const JoiDate = require("@hapi/joi-date");
+const Joi = JoiBase.extend(JoiDate);
+
+const serviceMemberValidation = (data) => {
+  const schema = Joi.object({
+    FirstName: Joi.string().allow(null, "").min(2).max(250),
+    MiddleName: Joi.string().allow(null, "").min(2).max(250),
+    LastName: Joi.string().allow(null, "").min(2).max(250),
+    ServiceCatogory: Joi.string().allow(null, "").min(2).max(250),
+    Address: Joi.string().allow(null, "").min(2).max(250),
+    Tel_No: Joi.string()
+      .allow(null, "")
+      .regex(/^(\+\d{1,2}\s?)?1?\-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/)
+      .min(10)
+      .max(12)
+      .messages({
+        "string.min": "Must have at least 10 characters",
+        "object.regex": "Must have at least 12 characters",
+        "string.pattern.base": "Phone number should be corrected",
+      }),
+    DOB: Joi.string().allow(null, "").min(2).max(250),
+    NIC: Joi.string().allow(null, "").min(2).max(250),
+    Date: Joi.string().allow(null, "").min(2).max(250),
+    Mobile_number: Joi.string()
+      .allow(null, "")
+      .regex(/^(\+\d{1,2}\s?)?1?\-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/)
+      .min(10)
+      .max(12)
+      .messages({
+        "string.min": "Must have at least 10 characters",
+        "object.regex": "Must have at least 12 characters",
+        "string.pattern.base": "Phone number should be corrected",
+      }),
+  });
+  return schema.validate(data);
+};
 
 const createServiceember = async (req,res)=>{
+  const { error } = serviceMemberValidation(req.body);
+  if (error)
+    return res.status(200).json({
+      code: 200,
+      success: false,
+      message: error.details[0].message,
+    });
     console.log(req.body);
     const servicemember = new AddServiceMember ({
         ...req.body, ServiceCatogory : req.body.ServiceCatogory.toUpperCase()
@@ -34,6 +78,13 @@ const getServiceMember = async (req,res)=>{
 }
 
 const updateServiceMember= async (req,res)=>{
+  const { error } = serviceMemberValidation(req.body);
+  if (error)
+    return res.status(200).json({
+      code: 200,
+      success: false,
+      message: error.details[0].message,
+    });
     const servicememberId = req.params.servicememberId;
     const updates = req.body;
     try {

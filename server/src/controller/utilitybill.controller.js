@@ -242,11 +242,11 @@ const getUtilityBillsByResidentId = async (req, res) => {
       last_electricity_bill: last_electricity_bill,
       last_water_bill: last_water_bill,
 
-      total_electricity_bill_amount: total_electricity_bill_amount,
-      total_water_bill_amount: total_water_bill_amount,
+      total_electricity_bill_amount: total_electricity_bill_amount.length > 0 ? total_electricity_bill_amount : null ,
+      total_water_bill_amount: total_water_bill_amount.length > 0 ? total_water_bill_amount : null,
 
-      total_electricity_paid_amount: total_electricity_paid_amount,
-      total_water_paid_amount: total_water_paid_amount,
+      total_electricity_paid_amount: total_electricity_paid_amount.length > 0 ? total_electricity_paid_amount : null,
+      total_water_paid_amount: total_water_paid_amount.length > 0 ? total_water_paid_amount : null,
     };
 
     res.status(200).json({
