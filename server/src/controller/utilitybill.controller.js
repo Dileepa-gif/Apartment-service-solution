@@ -55,11 +55,14 @@ const create = async (req, res) => {
     const resident = await Resident.findOne({
       resident_id: req.body.resident_id,
     });
-    console.log(resident)
     if (!resident)
       return res
         .status(200)
         .json({ code: 200, success: false, message: "Invalid resident id" });
+
+    const monthParts = req.body.month.split('-');
+    const temp = monthParts[0] + "-" + monthParts[1];
+    await UtilityBill.deleteMany({month : { $regex: temp + ".*" } })
     const utilityBill = new UtilityBill({
       ...req.body,
       type: req.body.type.toUpperCase(),

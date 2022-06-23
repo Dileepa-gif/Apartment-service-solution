@@ -54,7 +54,7 @@ const getAllServices = async (req, res) => {
 };
 
 const getServicesById = async (req, res) => {
-  const servicesId = req.params.complaintId;
+  const servicesId = req.params.servicesId;
   try {
     const service = await Service.findById(servicesId);
     if (service) {
