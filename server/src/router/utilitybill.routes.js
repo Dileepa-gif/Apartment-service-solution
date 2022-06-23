@@ -3,7 +3,7 @@ const router = Router();
 const auth = require('../util/auth');
 const { create, getAllUtilityBills, getUtilityBill, update, deleteUtilityBill, getUtilityBillsByResidentId, getPreviousBill, viewBill, addPaidAmount} = require("../controller/utilitybill.controller")
 
-router.post("/create", auth.authMiddleware(["RESIDENT"]), create);
+router.post("/create", create);
 router.get("/",getAllUtilityBills);
 router.get("/getUtilityBill/:utilityBillId",getUtilityBill);
 router.patch("/:UtilitybillId",update);
