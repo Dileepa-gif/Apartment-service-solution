@@ -54,9 +54,9 @@ const getAllServices = async (req, res) => {
 };
 
 const getServicesById = async (req, res) => {
-  const servicesId = req.params.servicesId;
+  const serviceId = req.params.serviceId;
   try {
-    const service = await Service.findById(servicesId);
+    const service = await Service.findById(serviceId);
     if (service) {
       res.status(200).json({
         code: 200,
