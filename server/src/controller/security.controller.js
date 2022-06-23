@@ -3,7 +3,7 @@ const JoiBase = require("@hapi/joi");
 const JoiDate = require("@hapi/joi-date");
 const Joi = JoiBase.extend(JoiDate);
 
-const { securityPasswordSender } = require("../util/emailService");
+const { securityPasswordSender, securityForgotPasswordSender } = require("../util/emailService");
 const bcrypt = require("bcrypt");
 const auth = require("../util/auth");
 
@@ -131,6 +131,50 @@ const login = async function (req, res) {
   }
 };
 
+const passwordReset = async function (req, res) {
+  try {
+    const { error } = securityRegisterValidation(req.body);
+    if (error)
+      return res.status(200).json({
+        code: 200,
+        success: false,
+        message: error.details[0].message,
+      });
+    const security = await Security.findOne({ email: req.body.email }).select(
+      "+password"
+    );
+
+    if (!security)
+      return res
+        .status(200)
+        .json({ code: 200, success: false, message: "Invalid Email" });
+
+    var randomPassword =  Math.random().toString(36).slice(-8);
+    const salt = await bcrypt.genSalt(10);
+    const password = await bcrypt.hash(randomPassword, salt);
+    var updatedSecurity = { password: password };
+
+    const _updatedSecurity = await Security.findByIdAndUpdate(
+      security.id,
+      updatedSecurity,
+      { new: true }
+    );
+
+    await securityForgotPasswordSender(_updatedSecurity, randomPassword);
+    res.status(200).json({
+      code: 200,
+      success: true,
+      data: _updatedSecurity,
+      message: "Please check your email!",
+    });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ code: 500, success: false, message: "Internal Server Error" });
+  }
+};
+
 const getAllSecurities = function (req, res) {
   try {
     Security.find(function (err, security_list) {
@@ -252,5 +296,6 @@ module.exports = {
   getAllSecurities,
   getSecurityById,
   update,
-  deleteSecurity
+  deleteSecurity,
+  passwordReset
 };

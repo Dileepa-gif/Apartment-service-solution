@@ -152,7 +152,7 @@ const passwordReset = async function (req, res) {
       { new: true }
     );
 
-    adminForgotPasswordSender(_updatedAdmin, randomPassword);
+    await adminForgotPasswordSender(_updatedAdmin, randomPassword);
     res.status(200).json({
       code: 200,
       success: true,

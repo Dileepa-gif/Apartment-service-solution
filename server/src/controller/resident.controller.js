@@ -167,7 +167,7 @@ const passwordReset = async function (req, res) {
       { new: true }
     );
 
-    residentForgotPasswordSender(_updatedResident, randomPassword);
+    await residentForgotPasswordSender(_updatedResident, randomPassword);
     res.status(200).json({
       code: 200,
       success: true,
