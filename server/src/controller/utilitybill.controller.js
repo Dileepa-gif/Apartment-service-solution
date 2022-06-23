@@ -63,6 +63,7 @@ const create = async (req, res) => {
     const monthParts = req.body.month.split('-');
     const temp = monthParts[0] + "-" + monthParts[1];
     await UtilityBill.deleteMany({month : { $regex: temp + ".*" }, type: req.body.type.toUpperCase()})
+    
     const utilityBill = new UtilityBill({
       ...req.body,
       type: req.body.type.toUpperCase(),
