@@ -3,7 +3,7 @@ const JoiBase = require("@hapi/joi");
 const JoiDate = require("@hapi/joi-date");
 const Joi = JoiBase.extend(JoiDate);
 
-const { residentPasswordSender } = require("../util/emailService");
+const { residentPasswordSender, residentForgotPasswordSender } = require("../util/emailService");
 const bcrypt = require("bcrypt");
 const auth = require("../util/auth");
 
@@ -137,6 +137,51 @@ const login = async function (req, res) {
   }
 };
 
+
+const passwordReset = async function (req, res) {
+  try {
+    const { error } = residentRegisterValidation(req.body);
+    if (error)
+      return res.status(200).json({
+        code: 200,
+        success: false,
+        message: error.details[0].message,
+      });
+    const resident = await Resident.findOne({ email: req.body.email }).select(
+      "+password"
+    );
+
+    if (!resident)
+      return res
+        .status(200)
+        .json({ code: 200, success: false, message: "Invalid Email" });
+
+    var randomPassword = Math.random().toString(36).slice(-8);
+    const salt = await bcrypt.genSalt(10);
+    const password = await bcrypt.hash(randomPassword, salt);
+    var updatedResident = { password: password };
+
+    const _updatedResident = await Resident.findByIdAndUpdate(
+      resident.id,
+      updatedResident,
+      { new: true }
+    );
+
+    residentForgotPasswordSender(_updatedResident, randomPassword);
+    res.status(200).json({
+      code: 200,
+      success: true,
+      data: _updatedResident,
+      message: "Please check your email!",
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ code: 500, success: false, message: "Internal Server Error" });
+  }
+};
+
+
 const getAllResidents = function (req, res) {
   try {
     Resident.find(function (err, resident_list) {
@@ -260,4 +305,5 @@ module.exports = {
   getResidentById,
   update,
   deleteResident,
+  passwordReset
 };

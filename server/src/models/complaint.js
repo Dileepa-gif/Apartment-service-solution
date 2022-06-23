@@ -7,6 +7,10 @@ const complaintSchema = new Schema({
     ref: "user",
     required: true,
   },
+  resident_id: {
+    type: String,
+    required: true,
+  },
   date: {
     type: String,
     required: true,
