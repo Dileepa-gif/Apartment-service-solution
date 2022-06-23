@@ -81,77 +81,79 @@ exports.securityPasswordSender = async function (security,randomPassword) {
 
 
 
-exports.adminForgotPasswordSender = async function (user,randomPassword) {
+exports.adminForgotPasswordSender = async function (admin,randomPassword) {
   transport
     .sendMail({
-      from: "vehicleservicecenterfct@gmail.com",
-      to: user.email,
+      from: sender_email,
+      to: admin.email,
       subject: "Please  log in and update your account",
-      html: `<h1><b>Hello ${user.first_name} !</b></h1>
+      html: `<h1><b>Hello ${admin.name} !</b></h1>
 
                 <h4><i>Forgot password resetting</i></h4>
                 <h5>Let's log in and update your admin account by using below recovery password</h5><br>
-                <p><b>Email : </b>${user.email}</p>
+                <p><b>Email : </b>${admin.email}</p>
                 <p><b>Password : </b>${randomPassword}</p><br>`,
     })
     .then(() => {
-      console.log("Email Sent to " + user.email + " to reset admin password.");
+      console.log("Email Sent to " + admin.email + " to reset admin password.");
     })
     .catch(() => {
       console.log(
-        "Email Not Sent to " + user.email + " to reset admin password."
+        "Email Not Sent to " + admin.email + " to reset admin password."
       );
     });
 };
 
 
 
-exports.employeeForgotPasswordSender = async function (user,randomPassword) {
+exports.residentForgotPasswordSender = async function (resident,randomPassword) {
   transport
     .sendMail({
-      from: "vehicleservicecenterfct@gmail.com",
-      to: user.email,
+      from: sender_email,
+      to: resident.email,
       subject: "Please  log in and update your account",
-      html: `<h1><b>Hello ${user.first_name} !</b></h1>
+      html: `<h1><b>Hello ${resident.name} !</b></h1>
 
                 <h4><i>Forgot password resetting</i></h4>
-                <h5>Let's log in and update your employee account by using below recovery password</h5><br>
-                <p><b>Email : </b>${user.email}</p>
+                <h5>Let's log in and update your resident account by using below recovery password</h5><br>
+                <p><b>Email : </b>${resident.email}</p>
                 <p><b>Password : </b>${randomPassword}</p><br>`,
     })
     .then(() => {
-      console.log("Email Sent to " + user.email + " to reset employee password.");
+      console.log("Email Sent to " + resident.email + " to reset resident password.");
     })
     .catch(() => {
       console.log(
-        "Email Not Sent to " + user.email + " to reset employee password."
+        "Email Not Sent to " + resident.email + " to reset resident password."
       );
     });
 };
 
-
-exports.customerForgotPasswordSender = async function (user,randomPassword) {
+exports.securityForgotPasswordSender = async function (security,randomPassword) {
   transport
     .sendMail({
-      from: "vehicleservicecenterfct@gmail.com",
-      to: user.email,
+      from: sender_email,
+      to: security.email,
       subject: "Please  log in and update your account",
-      html: `<h1><b>Hello ${user.first_name} !</b></h1>
+      html: `<h1><b>Hello ${security.name} !</b></h1>
 
                 <h4><i>Forgot password resetting</i></h4>
-                <h5>Let's log in and update your customer account by using below recovery password</h5><br>
-                <p><b>Email : </b>${user.email}</p>
+                <h5>Let's log in and update your security account by using below recovery password</h5><br>
+                <p><b>Email : </b>${security.email}</p>
                 <p><b>Password : </b>${randomPassword}</p><br>`,
     })
     .then(() => {
-      console.log("Email Sent to " + user.email + " to reset customer password.");
+      console.log("Email Sent to " + security.email + " to reset security password.");
     })
     .catch(() => {
       console.log(
-        "Email Not Sent to " + user.email + " to reset customer password."
+        "Email Not Sent to " + security.email + " to reset security password."
       );
     });
 };
+
+
+
 
 
 

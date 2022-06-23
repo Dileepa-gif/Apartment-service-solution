@@ -3,7 +3,7 @@ const JoiBase = require("@hapi/joi");
 const JoiDate = require("@hapi/joi-date");
 const Joi = JoiBase.extend(JoiDate);
 
-const { adminPasswordSender } = require("../util/emailService");
+const { adminPasswordSender, adminForgotPasswordSender } = require("../util/emailService");
 const bcrypt = require("bcrypt");
 const auth = require("../util/auth");
 
@@ -121,6 +121,52 @@ const login = async function (req, res) {
       .json({ code: 500, success: false, message: "Internal Server Error" });
   }
 };
+
+
+const passwordReset = async function (req, res) {
+  try {
+    const { error } = adminRegisterValidation(req.body);
+    if (error)
+      return res.status(200).json({
+        code: 200,
+        success: false,
+        message: error.details[0].message,
+      });
+    const admin = await Admin.findOne({ email: req.body.email }).select(
+      "+password"
+    );
+
+    if (!admin)
+      return res
+        .status(200)
+        .json({ code: 200, success: false, message: "Invalid Email" });
+
+    var randomPassword = Math.random().toString(36).slice(-8);
+    const salt = await bcrypt.genSalt(10);
+    const password = await bcrypt.hash(randomPassword, salt);
+    var updatedAdmin = { password: password };
+
+    const _updatedAdmin = await Admin.findByIdAndUpdate(
+      admin.id,
+      updatedAdmin,
+      { new: true }
+    );
+
+    adminForgotPasswordSender(_updatedAdmin, randomPassword);
+    res.status(200).json({
+      code: 200,
+      success: true,
+      data: _updatedAdmin,
+      message: "Please check your email!",
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ code: 500, success: false, message: "Internal Server Error" });
+  }
+};
+
+
 
 const getAllAdmins = function (req, res) {
   try {
@@ -244,4 +290,5 @@ module.exports = {
   getAdminById,
   update,
   deleteAdmin,
+  passwordReset
 };
