@@ -2,6 +2,7 @@ const UtilityBill = require("../models/utilitybill");
 const Resident = require("../models/resident");
 const JoiBase = require("@hapi/joi");
 const JoiDate = require("@hapi/joi-date");
+const { default: mongoose } = require("mongoose");
 const Joi = JoiBase.extend(JoiDate);
 
 const createAndUpdateValidation = (data) => {
@@ -213,14 +214,15 @@ const deleteUtilityBill = async (req, res) => {
 
 const getUtilityBillsByResidentId = async (req, res) => {
   try {
+    const logResidentId =  mongoose.Types.ObjectId(req.jwt.sub.id);
     var current_electricity_bill = await UtilityBill.findOne({
-      resident_object_id: req.jwt.sub.id,
+      resident_object_id: logResidentId,
       type: "ELECTRICITY",
     })
       .sort({ _id: -1 })
       .limit(1);
     var current_water_bill = await UtilityBill.findOne({
-      resident_object_id: req.jwt.sub.id,
+      resident_object_id: logResidentId,
       type: "WATER",
     })
       .sort({ _id: -1 })
@@ -230,36 +232,38 @@ const getUtilityBillsByResidentId = async (req, res) => {
     if (current_electricity_bill) {
       last_electricity_bill = await UtilityBill.findOne({
         _id: { $lt: current_electricity_bill.id },
+        resident_object_id: logResidentId,
         type: "ELECTRICITY",
       })
-        .sort({ _id: -1 })
-        .limit(1);
+      .sort({ _id: -1 })
+      .limit(1);
     }
 
     var last_water_bill = null;
     if (current_water_bill) {
       last_water_bill = await UtilityBill.findOne({
         _id: { $lt: current_water_bill.id },
+        resident_object_id: logResidentId,
         type: "WATER",
       })
         .sort({ _id: -1 })
         .limit(1);
     }
     var total_electricity_bill_amount = await UtilityBill.aggregate([
-      { $match: { type: "ELECTRICITY" } },
+      { $match: { resident_object_id: logResidentId, type: "ELECTRICITY" } },
       { $group: { _id: null, sum_val: { $sum: "$bill_amount" } } },
     ]);
     var total_water_bill_amount = await UtilityBill.aggregate([
-      { $match: { type: "WATER" } },
+      { $match: { resident_object_id: logResidentId, type: "WATER" } },
       { $group: { _id: null, sum_val: { $sum: "$bill_amount" } } },
     ]);
 
     var total_electricity_paid_amount = await UtilityBill.aggregate([
-      { $match: { type: "ELECTRICITY" } },
+      { $match: { resident_object_id: logResidentId, type: "ELECTRICITY" } },
       { $group: { _id: null, sum_val: { $sum: "$paid_amount" } } },
     ]);
     var total_water_paid_amount = await UtilityBill.aggregate([
-      { $match: { type: "WATER" } },
+      { $match: { resident_object_id: logResidentId, type: "WATER" } },
       { $group: { _id: null, sum_val: { $sum: "$paid_amount" } } },
     ]);
 
