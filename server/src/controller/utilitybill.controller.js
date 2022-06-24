@@ -62,18 +62,35 @@ const create = async (req, res) => {
 
     const monthParts = req.body.month.split('-');
     const temp = monthParts[0] + "-" + monthParts[1];
-    await UtilityBill.deleteMany({month : { $regex: temp + ".*" }, type: req.body.type.toUpperCase()})
     
-    const utilityBill = new UtilityBill({
-      ...req.body,
-      type: req.body.type.toUpperCase(),
-      resident_object_id: resident.id,
-    });
+    const existUtilityBill = await UtilityBill.findOne({month : { $regex: temp + ".*" }, type: req.body.type.toUpperCase(), resident_id: req.body.resident_id});
+    var newUtilityBill = "";
 
-    const savedUtilityBill = await utilityBill.save();
+    if(existUtilityBill){
+
+      const utilityBill ={
+        ...req.body,
+        type: req.body.type.toUpperCase(),
+        resident_object_id: resident.id,
+      };
+
+      newUtilityBill = await UtilityBill.findByIdAndUpdate(
+        existUtilityBill.id,
+        utilityBill,
+        { new: true }
+      );
+    }else{
+      const utilityBill = new UtilityBill({
+        ...req.body,
+        type: req.body.type.toUpperCase(),
+        resident_object_id: resident.id,
+      });
+      newUtilityBill = await utilityBill.save();
+    }
+
     return res
       .status(200)
-      .json({ code: 200, success: true, data: savedUtilityBill });
+      .json({ code: 200, success: true, data: newUtilityBill });
   } catch (error) {
     console.log(error);
     res
@@ -85,7 +102,11 @@ const create = async (req, res) => {
 const getAllUtilityBills = async (req, res) => {
   try {
     const utilityBill = await UtilityBill.find();
-    res.send(utilityBill);
+    res.status(200).json({
+      code: 200,
+      success: true,
+      data: utilityBill,
+    });
   } catch (error) {
     console.log(error);
     res
@@ -209,6 +230,7 @@ const getUtilityBillsByResidentId = async (req, res) => {
     if (current_electricity_bill) {
       last_electricity_bill = await UtilityBill.findOne({
         _id: { $lt: current_electricity_bill.id },
+        type: "ELECTRICITY",
       })
         .sort({ _id: -1 })
         .limit(1);
@@ -218,6 +240,7 @@ const getUtilityBillsByResidentId = async (req, res) => {
     if (current_water_bill) {
       last_water_bill = await UtilityBill.findOne({
         _id: { $lt: current_water_bill.id },
+        type: "WATER",
       })
         .sort({ _id: -1 })
         .limit(1);
@@ -245,13 +268,10 @@ const getUtilityBillsByResidentId = async (req, res) => {
       current_water_bill: current_water_bill,
       last_electricity_bill: last_electricity_bill,
       last_water_bill: last_water_bill,
-
-      total_electricity_bill_amount: total_electricity_bill_amount.length > 0 ? total_electricity_bill_amount : null ,
-      total_water_bill_amount: total_water_bill_amount.length > 0 ? total_water_bill_amount : null,
-
-      total_electricity_paid_amount: total_electricity_paid_amount.length > 0 ? total_electricity_paid_amount : null,
-      total_water_paid_amount: total_water_paid_amount.length > 0 ? total_water_paid_amount : null,
+      electricity_payable_amount : (total_electricity_bill_amount.length > 0 ? total_electricity_bill_amount[0].sum_val : 0) - (total_electricity_paid_amount.length > 0 ? total_electricity_paid_amount[0].sum_val : 0),
+      water_payable_amount : (total_water_bill_amount.length > 0 ? total_water_bill_amount[0].sum_val : 0) - (total_water_paid_amount.length > 0 ? total_water_paid_amount[0].sum_val : 0)
     };
+
 
     res.status(200).json({
       code: 200,
