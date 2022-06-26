@@ -1,7 +1,7 @@
 
 const {Router} = require("express")
 const router = Router();
-const {create, login, passwordReset, getAllResidents, getResidentById, update, deleteResident} = require("../controller/resident.controller")
+const {create, login, passwordReset, getAllResidents, getResidentById, update, deleteResident, getResidentByResidentId} = require("../controller/resident.controller")
 const auth = require('../util/auth');
 
 router.post("/create", create);
@@ -11,5 +11,6 @@ router.get("/",  getAllResidents);
 router.get("/:residentId",  getResidentById)
 router.put("/:residentId",  update)
 router.delete("/:residentId",  deleteResident)
+router.post("/getResidentByResidentId", getResidentByResidentId);
 
 module.exports.residentRouter = router;

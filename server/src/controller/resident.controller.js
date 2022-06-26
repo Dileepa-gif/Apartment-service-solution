@@ -46,6 +46,13 @@ const residentUpdateValidation = (data) => {
   return schema.validate(data);
 };
 
+const getResidentByResidentIdValidation = (data) => {
+  const schema = Joi.object({
+    resident_id: Joi.string().required().max(250),
+  });
+  return schema.validate(data);
+};
+
 const create = async function (req, res) {
   try {
     const { error } = residentRegisterValidation(req.body);
@@ -233,6 +240,46 @@ const getResidentById = function (req, res) {
   }
 };
 
+
+const getResidentByResidentId = function (req, res) {
+  try {
+    const { error } = getResidentByResidentIdValidation(req.body);
+    if (error)
+      return res.status(200).json({
+        code: 200,
+        success: false,
+        message: error.details[0].message,
+      });
+
+    Resident.findOne({resident_id : req.body.resident_id}, function (err, resident) {
+      if (err) {
+        return res
+          .status(200)
+          .json({ code: 200, success: false, message: "Invalid resident id!" });
+      }
+      if (resident) {
+        res.status(200).json({
+          code: 200,
+          success: true,
+          data: resident,
+          message: "Profile is received",
+        });
+      } else {
+        res.status(200).json({
+          code: 200,
+          success: false,
+          data: resident,
+          message: "Profile is not found",
+        });
+      }
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ code: 500, success: false, message: "Internal Server Error" });
+  }
+};
+
 const update = async function (req, res) {
   try {
     const oldResident = await Resident.findById(req.params.residentId);
@@ -305,5 +352,6 @@ module.exports = {
   getResidentById,
   update,
   deleteResident,
-  passwordReset
+  passwordReset,
+  getResidentByResidentId
 };
