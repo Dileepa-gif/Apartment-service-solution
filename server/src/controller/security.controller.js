@@ -270,9 +270,9 @@ const update = async function (req, res) {
 
 const deleteSecurity = async function (req, res) {
   try {
-    Security.remove({ _id: req.params.securityId }, function (err, security) {
+    Security.deleteOne({ _id: req.params.securityId }, function (err, security) {
       if (err) {
-        res
+        return res
           .status(200)
           .json({ code: 200, success: false, data: "Unable to delete!" });
       }

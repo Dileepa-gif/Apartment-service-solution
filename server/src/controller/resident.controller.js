@@ -325,9 +325,9 @@ const update = async function (req, res) {
 
 const deleteResident = async function (req, res) {
   try {
-    Resident.remove({ _id: req.params.residentId }, function (err, resident) {
+    Resident.deleteOne({ _id: req.params.residentId }, function (err, resident) {
       if (err) {
-        res
+        return res
           .status(200)
           .json({ code: 200, success: false, data: "Unable to delete!" });
       }

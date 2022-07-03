@@ -263,9 +263,9 @@ const update = async function (req, res) {
 
 const deleteAdmin = async function (req, res) {
   try {
-    Admin.remove({ _id: req.params.adminId }, function (err, admin) {
+    Admin.deleteOne({ _id: req.params.adminId }, function (err, admin) {
       if (err) {
-        res
+        return res
           .status(200)
           .json({ code: 200, success: false, data: "Unable to delete!" });
       }
